@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"slices"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 )
 
 type Todo struct {
@@ -15,13 +18,19 @@ type Todo struct {
 
 func main() {
 	fmt.Println("mepw")
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	PORT := os.Getenv("PORT")
 
 	app := fiber.New()
 
 	todos := []Todo{}
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.Status(200).JSON(fiber.Map{"msg": "hello world"})
+	app.Get("/api/todos", func(c *fiber.Ctx) error {
+		return c.Status(200).JSON(todos)
 	})
 
 	//Creates a todo
@@ -58,6 +67,21 @@ func main() {
 		return c.Status(400).JSON(fiber.Map{"Error": "Todo Not found"})
 	})
 
-	log.Fatal(app.Listen(":3000"))
+	//Delete a todo
+
+	app.Delete("/api/todos/:id", func(c *fiber.Ctx) error {
+		id := c.Params("id")
+
+		for i, todo := range todos {
+			if fmt.Sprint(todo.ID) == id {
+				todos = slices.Delete(todos, i, i+1)
+				return c.Status(200).JSON(fiber.Map{"success": true})
+			}
+		}
+
+		return c.Status(400).JSON(fiber.Map{"Error": "Todo Not found"})
+	})
+
+	log.Fatal(app.Listen(":" + PORT))
 
 }
