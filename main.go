@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 )
-
+//This was without DB
 type Todo struct {
 	ID        int    `json:"id"`
 	Completed bool   `json:"completed"`
