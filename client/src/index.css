@@ -82,7 +82,7 @@ body {
   transition: color 0.3s ease;
 }
 
-.border-primary-border-color {
+/* .border-primary-border-color {
   border-color: var(--primary-border-color);
   transition: border-color 0.3s ease;
-}
+} */

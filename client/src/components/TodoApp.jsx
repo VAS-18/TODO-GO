@@ -10,8 +10,11 @@ function TodoApp() {
   const [newTodo, setNewTodo] = useState();
   const [result, setResult] = useState([]);
 
-
-  const { data: todos, isLoading, isError } = useQuery({
+  const {
+    data: todos,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["todos"],
     queryFn: async () => {
       try {
@@ -26,16 +29,19 @@ function TodoApp() {
 
   const handleUpdateTodo = useMutation({
     mutationFn: async (updatedTodo) => {
-      const result = await axios.patch(`http://localhost:5000/api/todos/${updatedTodo._id}`, updatedTodo);
+      const result = await axios.patch(
+        `http://localhost:5000/api/todos/${updatedTodo._id}`,
+        updatedTodo
+      );
       return result.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
-    }
-  })
+    },
+  });
 
   const toggleComplete = (todo) => {
-    const updatedTodo = { ...todo }
+    const updatedTodo = { ...todo };
     if (updatedTodo.completed == false) {
       updatedTodo.completed = !updatedTodo.completed;
     }
@@ -45,12 +51,31 @@ function TodoApp() {
     handleUpdateTodo.mutate(updatedTodo);
 
     console.log(updatedTodo.body + updatedTodo.completed);
-  }
+  };
 
   const handleCreateTodo = async (e) => {
     e.preventDefault();
+    try {
+      const response = await axios.post("http://localhost:5000/api/todos/", {
+        body: newTodo,
+      });
 
+      console.log(response.data);
+    } catch (error) {
+      console.error("Couldnt create todo");
+    }
+  };
 
+  const handleDelete = async (todo) => {
+    try {
+      const deleteTodo = { ...todo };
+      const response = await axios.delete(
+        `http://localhost:5000/api/todos/${deleteTodo._id}`
+      );
+      console.log(response);
+    } catch (error) {
+      console.error("Could not delete the todo");
+    }
   };
 
   return (
@@ -68,55 +93,86 @@ function TodoApp() {
             />
             <button
               type="submit"
-              className={`absolute inset-y-0 right-0 flex items-center px-3 rounded-r-md focus:ring-2 hover:cursor-pointer ${theme === "dark"
-                ? "bg-white text-black hover:bg-gray-200"
-                : "bg-black text-white hover:bg-gray-900"
-                }`}
+              className={`absolute inset-y-0 right-0 flex items-center px-3 rounded-r-md focus:ring-2 hover:cursor-pointer ${
+                theme === "dark"
+                  ? "bg-white text-black hover:bg-gray-200"
+                  : "bg-black text-white hover:bg-gray-900"
+              }`}
             >
               <Plus
-                className={`w-5 h-5 ${theme === "dark" ? "text-black" : "text-white"
-                  }`}
+                className={`w-5 h-5 ${
+                  theme === "dark" ? "text-black" : "text-white"
+                }`}
               />
             </button>
           </form>
         </div>
       </div>
       {/* todo list */}
-      <div className="container max-w-lg mx-auto">
+      <div className="container max-w-lg mx-auto mt-10">
         {result.map((todo) => (
-          <div className="flex justify-between items-start p-3 border-b" key={todo.id}>
+          <div className="flex justify-between items-start p-5" key={todo.id}>
+            <button className="border"
+             onClick={() => handleDelete(todo)}>
+              BIG ASS BUTTON
+            </button>
             <div className="flex flex-col">
-              <div className={`text-base ${todo.completed ? "line-through text-gray-500" : ""}`}>
+              <div
+                className={`text-base ${
+                  todo.completed ? "line-through text-gray-500" : ""
+                }`}
+              >
                 {todo.body}
               </div>
               <div className="flex gap-3 mt-1 text-xs text-gray-500">
                 <span>{new Date(todo.createdAt).toLocaleString()}</span>
-                <span className={`font-medium ${todo.priority === "high" ? "text-red-500" :
-                    todo.priority === "medium" ? "text-yellow-500" : "text-green-500"
-                  }`}>
+                <span
+                  className={`font-medium ${
+                    todo.priority === "high"
+                      ? "text-red-500"
+                      : todo.priority === "medium"
+                      ? "text-yellow-500"
+                      : "text-green-500"
+                  }`}
+                >
                   {todo.priority}
                 </span>
               </div>
             </div>
             <button
               onClick={() => toggleComplete(todo)}
-              className={`w-5 h-5 rounded-full flex items-center justify-center focus:outline-none transition-colors duration-200 cursor-pointer ${todo.completed
-                  ? `${theme === "dark" ? "bg-white" : "bg-black"}`
-                  : `bg-transparent ${theme === "dark" ? "border border-white" : "border border-black"}`
-                }`}
-              aria-label={todo.completed ? "Mark as incomplete" : "Mark as complete"}
+              className={`w-5 h-5 rounded-full flex items-center justify-center focus:outline-none transition-colors duration-200 cursor-pointer 
+    ${
+      todo.completed
+        ? `${
+            theme === "dark"
+              ? "bg-white hover:border hover:border-white "
+              : "bg-black hover:border hover:border-white"
+          }`
+        : `bg-transparent 
+                  ${
+                    theme === "dark"
+                      ? "border border-white hover:border hover:border-white"
+                      : "border border-black hover:border hover:border-white"
+                  }`
+    }
+  `}
+              aria-label={
+                todo.completed ? "Mark as incomplete" : "Mark as complete"
+              }
             >
               {todo.completed && (
-                <div className={`w-3 h-3 ${theme === "dark" ? "bg-black" : "bg-white"} rounded-full`}></div>
+                <div
+                  className={`w-1 h-1 ${
+                    theme === "dark" ? "bg-black" : "bg-white"
+                  } rounded-full`}
+                ></div>
               )}
             </button>
           </div>
         ))}
       </div>
-
     </div>
-
-
   );
 }
 
