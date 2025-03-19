@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
+import { Delete, Plus, Trash } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -61,6 +61,7 @@ function TodoApp() {
       });
 
       console.log(response.data);
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
     } catch (error) {
       console.error("Couldnt create todo");
     }
@@ -73,12 +74,14 @@ function TodoApp() {
         `http://localhost:5000/api/todos/${deleteTodo._id}`
       );
       console.log(response);
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
     } catch (error) {
       console.error("Could not delete the todo");
     }
   };
 
   return (
+    
     <div className="container">
       <div className="flex justify-center items-center mt-6 sm:mt-10 md:mt-10">
         <div class="relative w-full max-w-sm">
@@ -110,13 +113,13 @@ function TodoApp() {
       </div>
       {/* todo list */}
       <div className="container max-w-lg mx-auto mt-10">
-        {result.map((todo) => (
+        {result?.map((todo) => (
           <div className="flex justify-between items-start p-5" key={todo.id}>
-            <button className="border"
-             onClick={() => handleDelete(todo)}>
-              BIG ASS BUTTON
-            </button>
             <div className="flex flex-col">
+            <button className=""
+             onClick={() => handleDelete(todo)}>
+              <Trash className="w-4 h-4 hover:opacity-50 cursor-pointer"/>
+            </button>
               <div
                 className={`text-base ${
                   todo.completed ? "line-through text-gray-500" : ""
