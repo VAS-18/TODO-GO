@@ -76,7 +76,7 @@ const DateTime = () => {
       </div>
       <div className="flex justify-center items-center">
         <div>
-          <h1 className="text-6xl font-poppins">{greeting}</h1>
+          <h1 className="text-6xl font-sans">{greeting}</h1>
           <p className="font-funnel text-gray-400">What are we doing today?</p>
         </div>
       </div>

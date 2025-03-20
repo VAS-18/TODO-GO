@@ -10,6 +10,10 @@ function TodoApp() {
   const [newTodo, setNewTodo] = useState();
   const [result, setResult] = useState([]);
 
+  // const getDate = ()=> {
+  //   const
+  // }
+
   const {
     data: todos,
     isLoading,
@@ -81,7 +85,6 @@ function TodoApp() {
   };
 
   return (
-    
     <div className="container">
       <div className="flex justify-center items-center mt-6 sm:mt-10 md:mt-10">
         <div class="relative w-full max-w-sm">
@@ -116,10 +119,9 @@ function TodoApp() {
         {result?.map((todo) => (
           <div className="flex justify-between items-start p-5" key={todo.id}>
             <div className="flex flex-col">
-            <button className=""
-             onClick={() => handleDelete(todo)}>
-              <Trash className="w-4 h-4 hover:opacity-50 cursor-pointer"/>
-            </button>
+              <button className="" onClick={() => handleDelete(todo)}>
+                <Trash className="w-4 h-4 hover:opacity-50 cursor-pointer" />
+              </button>
               <div
                 className={`text-base ${
                   todo.completed ? "line-through text-gray-500" : ""
@@ -128,7 +130,8 @@ function TodoApp() {
                 {todo.body}
               </div>
               <div className="flex gap-3 mt-1 text-xs text-gray-500">
-                <span>{new Date(todo.createdAt).toLocaleString()}</span>
+                <span>{todo.CreatedAtDate}</span>
+                <span>{todo.CreatedAtTime}</span>
                 <span
                   className={`font-medium ${
                     todo.priority === "high"

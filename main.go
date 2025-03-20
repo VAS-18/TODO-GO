@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -16,15 +18,24 @@ import (
 )
 
 type Todo struct {
-	ID        primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Completed bool               `json:"completed"`
-	Body      string             `json:"body"`
+	ID            primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Completed     bool               `json:"completed"`
+	Body          string             `json:"body"`
+	CreatedAtTime string             `json:"CreatedAtTime"`
+	CreatedAtDate string             `json:"CreatedAtDate"`
 }
 
 var collection *mongo.Collection
 
 func main() {
-	fmt.Println("hello world")
+	// currentTime := time.Now()
+	// currentHour := strconv.FormatInt(int64(currentTime.Hour()), 10)
+	// currentMinute := strconv.FormatInt(int64(currentTime.Minute()), 10)
+	// currentDate := strconv.FormatInt(int64(currentTime.Day()), 10)
+	// currentMonth := strconv.FormatInt(int64(currentTime.Month()), 10)
+	// finalTime := fmt.Sprintf("%s:%s", currentHour, currentMinute)
+
+	// fmt.Println(currentHour, currentMinute, currentDate, currentMonth, finalTime)
 
 	if os.Getenv("ENV") != "production" {
 		err := godotenv.Load(".env")
@@ -53,7 +64,7 @@ func main() {
 	collection = client.Database("golang_db").Collection("todos")
 
 	app := fiber.New()
-	
+
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "http://localhost:5173",
 		AllowHeaders: "Origin,Content-Type,Accept",
@@ -70,7 +81,7 @@ func main() {
 	}
 
 	if os.Getenv("ENV") == "production" {
-		app.Static("/", "./client/dist")
+		app.Static("/", "./client")
 	}
 
 	log.Fatal(app.Listen("0.0.0.0:" + port))
@@ -110,6 +121,17 @@ func createTodo(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "Todo body cannot be empty"})
 	}
 
+	currentTime := time.Now()
+	currentHour := strconv.FormatInt(int64(currentTime.Hour()), 10)
+	currentMinute := strconv.FormatInt(int64(currentTime.Minute()), 10)
+	currentDate := strconv.FormatInt(int64(currentTime.Day()), 10)
+	currentMonth := strconv.FormatInt(int64(currentTime.Month()), 10)
+
+	finalTime := fmt.Sprintf("%s:%s", currentHour, currentMinute)
+	finalDate := fmt.Sprintf("%s/%s", currentDate, currentMonth)
+
+	todo.CreatedAtDate = finalDate
+	todo.CreatedAtTime = finalTime
 	insertResult, err := collection.InsertOne(context.Background(), todo)
 	if err != nil {
 		return err
@@ -157,3 +179,16 @@ func deleteTodo(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{"success": true})
 }
+
+// func (t Todo) MarshalJSON() ([]byte, error) {
+// 	type Alias Todo
+// 	return json.Marshal(&struct {
+// 		CreatedAtTime string `json:"createdAtTime"`
+// 		CreatedAtDate string `json:"createdAtDate"`
+// 		Alias
+// 	}{
+// 		CreatedAtTime: t.CreatedAtTime.Format("15:04:05"),
+// 		CreatedAtDate: t.CreatedAtDate.Format("2006-01-02"),
+// 		Alias:         (Alias)(t),
+// 	})
+// }
